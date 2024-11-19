@@ -2,7 +2,7 @@ using Mono.Cecil.Cil;
 using System.Collections;
 using UnityEngine;
 
-public class RigidBodyPlayerController : MonoBehaviour
+public class RigidBodyPlayerControllerWithAdjustedShootForce : MonoBehaviour
 {
     public Rigidbody rb;
     public MouseLook ml;
@@ -12,6 +12,7 @@ public class RigidBodyPlayerController : MonoBehaviour
     public float groundDist = 0.4f;
     [Space]
     public float shootforce = 45;
+    public float shootforceAir = 15f;
     public float shootDelayGround = 0.75f;
     public float shootDelayAir = 1.25f;
     [Space]
@@ -20,6 +21,7 @@ public class RigidBodyPlayerController : MonoBehaviour
 
     private bool isGrounded;
     private bool isShooting = false;
+    private bool lessShootForce;
 
     private float OGShootForce;
     private Vector3 playerMovementInput;
@@ -48,6 +50,7 @@ public class RigidBodyPlayerController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
         {
             rb.AddForce(Vector3.up * jumpforce, ForceMode.Impulse);
+            lessShootForce = false;
         }
         if (Input.GetMouseButtonDown(0) && !isShooting)
         {
@@ -62,9 +65,12 @@ public class RigidBodyPlayerController : MonoBehaviour
         if (!isGrounded)
         {
             facingPos = -ml.transform.forward;
-            rb.AddForce(facingPos * shootforce, ForceMode.Impulse);
+
+            float shootforcetemp = lessShootForce ? shootforceAir : shootforce;
+            rb.AddForce(facingPos * shootforcetemp, ForceMode.Impulse);
             delay = shootDelayAir;
             Debug.Log("Shoot in air");
+            lessShootForce = true;
         }
         else
         {
