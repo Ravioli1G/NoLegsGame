@@ -23,7 +23,6 @@ public class MouseLook : MonoBehaviour
         xRot -= mouseY;
         xRot = Mathf.Clamp(xRot, -90f, 90f);
 
-        Debug.DrawRay(transform.position, transform.forward * 1000, Color.green);
         transform.localRotation = Quaternion.Euler(xRot, 0f, 0f);
         playerBody.Rotate(Vector3.up * mouseX);
 
