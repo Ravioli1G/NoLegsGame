@@ -1,12 +1,15 @@
 using Mono.Cecil.Cil;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Animations;
 
 public class PlayerController : MonoBehaviour
 {
+    // TODO clean up globals
     public KeyCode Slug;
     public KeyCode Buck;
     public KeyCode Bird;
+    public GameObject gun;
     [Space]
     public Rigidbody rb;
     public MouseLook ml;
@@ -18,10 +21,11 @@ public class PlayerController : MonoBehaviour
     public Animator buckUI;
     public Animator slugUI;
     [Space]
-    public float walkspeed = 20f;
+    public float walkspeed = 1f;
     public float jumpforce = 1f;
     public float groundDist = 0.4f;
     public float maxSpread = 5f;
+    public float sprintMultiplier = 2f;
     [Space]
     public LayerMask groundMask;
     public Transform groundCheck;
@@ -33,22 +37,25 @@ public class PlayerController : MonoBehaviour
     private float shootDelayGround = 0.5f;
     private float shootDelayAir = 0.5f;
     private float range;
+    private float playerSpeed;
     private int pellets;
-    private Vector3 playerMovementInput;
     private Vector3 facingPos;
 
     private void Start()
     {
         LoadShell("Slug");
         slugUI.SetBool("SlugSelected", true);
+        playerSpeed = walkspeed;
     }
-    // enable walking by uncommenting code - currently bugged with jump shooting as setting the velocity
-    // of the rigid body gives it a teleporting effect - line 33
+
     void Update()
     {
-        //playerMovementInput = new Vector3(Input.GetAxis("Horizontal"), 0f, Input.GetAxis("Vertical"));
-        MovePlayer();
-        //fucking mess
+        // get player input axises
+        Vector3 playerMovementInput = new Vector3(Input.GetAxis("Horizontal"), 0f, Input.GetAxis("Vertical"));
+
+        MovePlayer(playerMovementInput);
+
+        //fixxxxxxxxx!!
         if (Input.GetKeyDown(Slug))
         {
             LoadShell("Slug");
@@ -72,20 +79,62 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    void MovePlayer() 
-    { 
-        //Vector3 MoveVector = transform.TransformDirection(playerMovementInput) * walkspeed;
+    void MovePlayer(Vector3 input) 
+    {
+        // ground check
         isGrounded = Physics.CheckSphere(groundCheck.position, groundDist, groundMask);
 
+        // hide gun when player is walking
+        gun.SetActive(InputCheck() || !isGrounded);
+
+        // make vector based on player input
+        Vector3 MoveVector = transform.TransformDirection(input) * playerSpeed;
+
+        // new method
+        rb.AddForce(MoveVector.normalized, ForceMode.Force);
+      
+        // apply movement to existing velocity
         //rb.linearVelocity = new Vector3(MoveVector.x, rb.linearVelocity.y, MoveVector.z);
 
-        if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
+        // should movement velocity be applied
+        if (isGrounded)
         {
-            rb.AddForce(Vector3.up * jumpforce, ForceMode.Impulse);
+            // jump
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                rb.AddForce(Vector3.up * jumpforce, ForceMode.Impulse);
+                Debug.Log("Jumppy");
+            }
+
+            // sprint
+            if (Input.GetKeyDown(KeyCode.LeftShift)) 
+            {
+                Sprint();
+            }
         }
+        // allow reset when in air
+        if (Input.GetKeyUp(KeyCode.LeftShift))
+        {
+            Walk();
+        }
+
+        // check if player is able to shoot
         if (Input.GetMouseButtonDown(0) && !isShooting)
         {
             Shoot();
+        }
+    }
+
+    bool InputCheck() 
+    {
+
+        if (Input.GetAxisRaw("Horizontal") == 0 && Input.GetAxisRaw("Vertical") == 0)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
         }
     }
 
@@ -102,31 +151,32 @@ public class PlayerController : MonoBehaviour
     void Shoot() 
     {
         float delay;
-        // force checks
+        // dont apply force when player is grounded
         if (!isGrounded)
         {
             facingPos = -ml.transform.forward;
 
             rb.AddForce(facingPos * shootforce, ForceMode.Impulse);
             delay = shootDelayAir;
-            Debug.Log("Shoot in air");
         }
         else
         {
             delay = shootDelayGround;
-            Debug.Log("Shoot on ground");
         }
 
         // shotgun pellet gen
         for (int i = 0; i < pellets; i++)
         {
-            RaycastHit hit;
+            RaycastHit hit; // raycast for each pellet
             
+            // check what is hit
             if (Physics.Raycast(pointer.position, RandomSpread(), out hit, range))
             {
                 if (hit.collider.tag == "Enemy") 
                 {
-                    hit.collider.GetComponent<Hitbox>().OnRaycastHit(this, pointer.transform.forward, hit.rigidbody);
+                    // destroy enemy on hit
+                    Destroy(hit.collider.gameObject);
+                        
                 }
                 if (hit.collider.gameObject.layer == LayerMask.NameToLayer("Ground")) 
                 {
@@ -139,7 +189,7 @@ public class PlayerController : MonoBehaviour
             }
         }
 
-        StartCoroutine(gunDelay(delay));
+        StartCoroutine(gunDelay(delay)); // delay for cocking gun
     }
 
     IEnumerator gunDelay(float delay) 
@@ -149,6 +199,16 @@ public class PlayerController : MonoBehaviour
         isShooting = false;
     }
 
+    void Sprint() 
+    {
+        playerSpeed = walkspeed * sprintMultiplier;
+        // hide gun
+    }
+
+    void Walk() 
+    {
+        playerSpeed = walkspeed;
+    }
     Vector3 RandomSpread() 
     { 
         Vector3 targetPos = pointer.position + pointer.forward * range;

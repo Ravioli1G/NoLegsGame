@@ -1469,6 +1469,7 @@ MonoBehaviour:
   Slug: 101
   Buck: 119
   Bird: 113
+  gun: {fileID: 4495927459853698795}
   rb: {fileID: 8088167903120337386}
   ml: {fileID: 1610372037851955764}
   pointer: {fileID: 6341150472046926108}
@@ -1478,10 +1479,11 @@ MonoBehaviour:
   birdUI: {fileID: 3185346357429588315}
   buckUI: {fileID: 6157563734628889526}
   slugUI: {fileID: 7535167373983015489}
-  walkspeed: 20
+  walkspeed: 5
   jumpforce: 10
   groundDist: 0.4
   maxSpread: 3
+  sprintMultiplier: 2
   groundMask:
     serializedVersion: 2
     m_Bits: 64
