@@ -1,10 +1,9 @@
-using System.Collections;
 using UnityEngine;
+using System.Collections;
 
-public class Shotgun : MonoBehaviour
+public class Pistol : MonoBehaviour
 {
     public PlayerControllerNew player;
-    public Bullets bullets;
     public ParticleSystem particles;
     public MouseLook mouseLook;
     public Transform barrel;
@@ -18,10 +17,20 @@ public class Shotgun : MonoBehaviour
     public float groundDelay;
 
     [Header("Gun Values")]
-    public float maxSpread = 5f;
+    public float range = 80f;
+    public float force = 0f;
 
-    private Shell loadedShell;
     private bool isReloading = false;
+    private float delay;
+
+    private void OnEnable()
+    {
+        // incase reloading is not complete when player moves
+        if (isReloading)
+        {
+            StartCoroutine(Reload(delay));
+        }
+    }
 
     private void Update()
     {
@@ -31,17 +40,14 @@ public class Shotgun : MonoBehaviour
         }
     }
 
-    void Shoot() 
+    void Shoot()
     {
-        LoadShell("Slug");
-
-        float delay;
 
         // add recoil to the player when flying
         if (!player.isGrounded)
         {
             Vector3 facingPos = -mouseLook.transform.forward;
-            player.rb.AddForce(facingPos * loadedShell.shootingForce, ForceMode.Impulse);
+            player.rb.AddForce(facingPos * force, ForceMode.Impulse);
 
             delay = airDelay;
         }
@@ -50,31 +56,22 @@ public class Shotgun : MonoBehaviour
             delay = groundDelay;
         }
 
-        shotgunPelletGen(loadedShell.pellets);
-
-
+        BulletGen();
+        GunDelay(delay);
     }
 
-    void LoadShell(string bulletType) 
+    void BulletGen()
     {
-        loadedShell = bullets.getShell(bulletType);
-    }
+        RaycastHit hit;
 
-    void shotgunPelletGen(int pellets)
-    {
-        for (int i = 0; i < pellets; i++)
+        // hit cases
+        if (Physics.Raycast(barrel.position, barrel.forward, out hit, range))
         {
-            RaycastHit hit;
-
-            // hit cases
-            if (Physics.Raycast(barrel.position, RandomSpread(), out hit, loadedShell.range)) 
-            {
-                HitCases(hit);
-            }
+            HitCases(hit);
         }
     }
 
-    void HitCases(RaycastHit hit) 
+    void HitCases(RaycastHit hit)
     {
         if (hit.collider.tag == "Enemy")
         {
@@ -84,29 +81,22 @@ public class Shotgun : MonoBehaviour
         {
             Instantiate(particles, hit.point, Quaternion.identity);
         }
-        if (debugRayOn) 
+        if (debugRayOn)
         {
             DebugGun(hit.point);
         }
     }
 
-    Vector3 RandomSpread() 
-    { 
-        Vector3 targetPos = barrel.position + barrel.forward * loadedShell.range;
-        targetPos = new Vector3
-            (
-                targetPos.x + Random.Range(-maxSpread, maxSpread),
-                targetPos.y + Random.Range(-maxSpread, maxSpread),
-                targetPos.z + Random.Range(-maxSpread, maxSpread)
-            );
-
-        Vector3 dir = targetPos - barrel.position;
-        return dir.normalized;
-    }
-
-    IEnumerator gunDelay(float delay)
+    void GunDelay(float delay)
     {
         isReloading = true;
+        StartCoroutine(Reload(delay));
+    }
+
+    IEnumerator Reload(float delay)
+    {
+        Debug.Log("Delay has started" + delay + " isreloading: " + isReloading);
+        // play reload anim
         yield return new WaitForSeconds(delay);
         isReloading = false;
     }

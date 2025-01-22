@@ -1,3 +1,4 @@
+using System.Collections;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -24,7 +25,7 @@ public class PlayerControllerNew : MonoBehaviour
     public bool isGrounded;
 
     public Transform orientation;
-    public GameObject currentGun;
+    public PlayerWeapInventory weap;
 
     float horizontalInput;
     float verticalInput;
@@ -90,9 +91,10 @@ public class PlayerControllerNew : MonoBehaviour
         moveDir = orientation.forward * verticalInput + orientation.right * horizontalInput;
 
         // hide gun
-        currentGun.SetActive(MovementCheck());
+        weap.equipped.SetActive(MovementCheck());
 
         SetMulti();
+
 
         if (isGrounded)
         {
