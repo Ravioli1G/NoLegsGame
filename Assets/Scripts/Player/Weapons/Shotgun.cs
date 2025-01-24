@@ -48,13 +48,17 @@ public class Shotgun : MonoBehaviour
         // add recoil to the player when flying
         if (!player.isGrounded)
         {
+            // opposite of current looking direction
             Vector3 facingPos = -mouseLook.transform.forward;
             player.rb.AddForce(facingPos * loadedShell.shootingForce, ForceMode.Impulse);
 
+            // racking animation
             delay = airDelay;
         }
         else
         {
+
+            // racking animation
             delay = groundDelay;
         }
 
@@ -73,7 +77,7 @@ public class Shotgun : MonoBehaviour
         {
             RaycastHit hit;
 
-            // hit cases
+            // get result of the current raycast
             if (Physics.Raycast(barrel.position, RandomSpread(), out hit, loadedShell.range)) 
             {
                 HitCases(hit);
@@ -83,14 +87,17 @@ public class Shotgun : MonoBehaviour
 
     void HitCases(RaycastHit hit) 
     {
+        // go through each possible case
         if (hit.collider.tag == "Enemy")
         {
+            // replace with enemy death when implemented
             Destroy(hit.collider.gameObject);
         }
         if (hit.collider.gameObject.layer == LayerMask.NameToLayer("Ground"))
         {
             Instantiate(particles, hit.point, Quaternion.identity);
         }
+        // remove on final
         if (debugRayOn) 
         {
             DebugGun(hit.point);
@@ -99,7 +106,10 @@ public class Shotgun : MonoBehaviour
 
     Vector3 RandomSpread() 
     { 
+        // get the endpoint of the current pellet
         Vector3 targetPos = barrel.position + barrel.forward * loadedShell.range;
+        
+        // apply spread to endpoint
         targetPos = new Vector3
             (
                 targetPos.x + Random.Range(-maxSpread, maxSpread),
@@ -107,6 +117,7 @@ public class Shotgun : MonoBehaviour
                 targetPos.z + Random.Range(-maxSpread, maxSpread)
             );
 
+        // account for barrel position
         Vector3 dir = targetPos - barrel.position;
         return dir.normalized;
     }
@@ -119,13 +130,12 @@ public class Shotgun : MonoBehaviour
 
     IEnumerator reload(float delay) 
     {
-        Debug.Log("Delay has started" + delay + " isreloading: " + isReloading);
         // play reload anim
         yield return new WaitForSeconds(delay);
         isReloading = false;
     }
 
-    // Debugging only
+    // Debugging only, remove on final
     void DebugGun(Vector3 end)
     {
         LineRenderer lr = Instantiate(debugRay).GetComponent<LineRenderer>();

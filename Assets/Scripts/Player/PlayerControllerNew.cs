@@ -27,9 +27,6 @@ public class PlayerControllerNew : MonoBehaviour
     public Transform orientation;
     public PlayerWeapInventory weap;
 
-    float horizontalInput;
-    float verticalInput;
-
     private float currentSpeedMulti;
 
     Vector3 moveDir;
@@ -48,8 +45,6 @@ public class PlayerControllerNew : MonoBehaviour
         isGrounded = Physics.Raycast(transform.position, Vector3.down, playerHeight * 0.5f + 0.2f, ground);
 
         PlayerInput();
-        MovePlayer();
-        SpeedControl();
 
         // apply drag when grounded
         if (isGrounded)
@@ -65,8 +60,8 @@ public class PlayerControllerNew : MonoBehaviour
     void PlayerInput()
     {
         // get inputs
-        horizontalInput = Input.GetAxisRaw("Horizontal");
-        verticalInput = Input.GetAxisRaw("Vertical");
+        float horizontalInput = Input.GetAxisRaw("Horizontal");
+        float verticalInput = Input.GetAxisRaw("Vertical");
 
         // sprint
         if (Input.GetKey(KeyCode.LeftShift))
@@ -83,18 +78,18 @@ public class PlayerControllerNew : MonoBehaviour
         { 
             Jump();
         }
+
+        MovePlayer(horizontalInput, verticalInput);
     }
 
-    void MovePlayer()
+    void MovePlayer(float hor, float ver)
     {
         // calc move dir
-        moveDir = orientation.forward * verticalInput + orientation.right * horizontalInput;
+        moveDir = orientation.forward * ver + orientation.right * hor;
 
         // hide gun
-        weap.equipped.SetActive(MovementCheck());
-
-        SetMulti();
-
+        weap.ShowEquipped(SprintCheck());
+        SetMovementMultiplier();
 
         if (isGrounded)
         {
@@ -104,10 +99,12 @@ public class PlayerControllerNew : MonoBehaviour
         {
             AirMovement(moveDir);
         }
+
+        SpeedControl();
     }
 
 
-    void SetMulti() 
+    void SetMovementMultiplier() 
     {
         if (isSprinting)
         {
@@ -124,7 +121,7 @@ public class PlayerControllerNew : MonoBehaviour
         // current vel of player
         Vector3 flatVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
 
-        // reset vel to speed limit when players vel exceedes movespeed
+        // prevent player from reaching high than intended speeds
         if (flatVel.magnitude > moveSpeed && isGrounded) 
         { 
             Vector3 limitedVel = flatVel.normalized * moveSpeed;
@@ -171,16 +168,17 @@ public class PlayerControllerNew : MonoBehaviour
         rb.AddForce(transform.up * jumpForce, ForceMode.Impulse);
     }
 
-    bool MovementCheck() 
-    { 
+    bool SprintCheck() 
+    {
         // allows player to use gun while strafing in air
-        if (horizontalInput == 0f && verticalInput == 0f || !isGrounded) 
-        { 
-            return true;
-        }
-        else 
+        if (!isSprinting || !isGrounded) 
         { 
             return false;
+        }
+        else 
+        {
+            Debug.Log("Gameobject should be deactivated");
+            return true;
         }
     }
 }

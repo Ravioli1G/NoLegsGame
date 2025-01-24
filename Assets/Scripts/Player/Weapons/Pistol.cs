@@ -13,15 +13,13 @@ public class Pistol : MonoBehaviour
     public bool debugRayOn = false;
 
     [Header("Delay Times")]
-    public float airDelay;
-    public float groundDelay;
+    public float delay;
 
     [Header("Gun Values")]
     public float range = 80f;
     public float force = 0f;
 
     private bool isReloading = false;
-    private float delay;
 
     private void OnEnable()
     {
@@ -42,20 +40,6 @@ public class Pistol : MonoBehaviour
 
     void Shoot()
     {
-
-        // add recoil to the player when flying
-        if (!player.isGrounded)
-        {
-            Vector3 facingPos = -mouseLook.transform.forward;
-            player.rb.AddForce(facingPos * force, ForceMode.Impulse);
-
-            delay = airDelay;
-        }
-        else
-        {
-            delay = groundDelay;
-        }
-
         BulletGen();
         GunDelay(delay);
     }
@@ -95,7 +79,6 @@ public class Pistol : MonoBehaviour
 
     IEnumerator Reload(float delay)
     {
-        Debug.Log("Delay has started" + delay + " isreloading: " + isReloading);
         // play reload anim
         yield return new WaitForSeconds(delay);
         isReloading = false;

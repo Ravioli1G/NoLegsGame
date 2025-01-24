@@ -1034,8 +1034,7 @@ MonoBehaviour:
   barrel: {fileID: 1662987355}
   debugRay: {fileID: 6636705067958555630, guid: 1898b2b6fc8e40541936b2d49d0150ac, type: 3}
   debugRayOn: 0
-  airDelay: 0
-  groundDelay: 0
+  delay: 0
   range: 80
   force: 0
 --- !u!1 &768525902
@@ -3005,7 +3004,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8753531781543664185, guid: 1f85126d25337ba499a1dc0d5d658540, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 5674471026135258758, guid: 1f85126d25337ba499a1dc0d5d658540, type: 3}

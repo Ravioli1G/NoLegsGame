@@ -25,22 +25,21 @@ public class PlayerWeapInventory : MonoBehaviour
         {
             equipped.SetActive(false);
             equipped = weapons[0];
-            Debug.Log("weapon 1");
+            equipped.SetActive(true);
         }
         // scrollwheel down / secondary
         if (((Input.GetAxis("Mouse ScrollWheel") < 0f) || Input.GetKeyDown("2")) && equipped != weapons[1])
         {
             equipped.SetActive(false);
             equipped = weapons[1];
-            Debug.Log("weapon 2");
+            equipped.SetActive(true);
         }
-
-        EquipWeapon();
     }
 
-    void EquipWeapon() 
-    { 
-        equipped.SetActive(true);
+    public void ShowEquipped(bool show) 
+    {
+        equipped.SetActive(!show);
+        Debug.Log(equipped.ToString() + " Is " + !show);
     }
 
 }
