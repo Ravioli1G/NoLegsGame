@@ -43,7 +43,7 @@ public class Shotgun : MonoBehaviour
 
     void Shoot() 
     {
-        LoadShell("Slug");
+        LoadShell("Buck");
 
         // add recoil to the player when flying
         if (!player.isGrounded)
@@ -52,12 +52,11 @@ public class Shotgun : MonoBehaviour
             Vector3 facingPos = -mouseLook.transform.forward;
             player.rb.AddForce(facingPos * loadedShell.shootingForce, ForceMode.Impulse);
 
-            // racking animation
+            // air racking animation
             delay = airDelay;
         }
         else
         {
-
             // racking animation
             delay = groundDelay;
         }

@@ -88,7 +88,7 @@ public class PlayerControllerNew : MonoBehaviour
         moveDir = orientation.forward * ver + orientation.right * hor;
 
         // hide gun
-        weap.ShowEquipped(SprintCheck());
+        weap.ShowEquipped(MovementCheck(hor, ver));
         SetMovementMultiplier();
 
         if (isGrounded)
@@ -102,7 +102,6 @@ public class PlayerControllerNew : MonoBehaviour
 
         SpeedControl();
     }
-
 
     void SetMovementMultiplier() 
     {
@@ -168,17 +167,15 @@ public class PlayerControllerNew : MonoBehaviour
         rb.AddForce(transform.up * jumpForce, ForceMode.Impulse);
     }
 
-    bool SprintCheck() 
+    bool MovementCheck(float hor, float ver) 
     {
-        // allows player to use gun while strafing in air
-        if (!isSprinting || !isGrounded) 
-        { 
-            return false;
-        }
-        else 
+        if ((hor != 0 || ver != 0) && isGrounded)
         {
-            Debug.Log("Gameobject should be deactivated");
             return true;
+        }
+        else
+        {
+            return false;
         }
     }
 }

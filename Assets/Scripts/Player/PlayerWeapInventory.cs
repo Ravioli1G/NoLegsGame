@@ -23,23 +23,25 @@ public class PlayerWeapInventory : MonoBehaviour
         // scrollwheel up / primary
         if (((Input.GetAxis("Mouse ScrollWheel") > 0f) || Input.GetKeyDown("1")) && equipped != weapons[0])
         {
-            equipped.SetActive(false);
-            equipped = weapons[0];
-            equipped.SetActive(true);
+            EquipWeapon(0);
         }
         // scrollwheel down / secondary
         if (((Input.GetAxis("Mouse ScrollWheel") < 0f) || Input.GetKeyDown("2")) && equipped != weapons[1])
         {
-            equipped.SetActive(false);
-            equipped = weapons[1];
-            equipped.SetActive(true);
+            EquipWeapon(1);
         }
     }
 
-    public void ShowEquipped(bool show) 
+    void EquipWeapon(int weaponIndex) 
     {
-        equipped.SetActive(!show);
-        Debug.Log(equipped.ToString() + " Is " + !show);
+        equipped.SetActive(false);
+        equipped = weapons[weaponIndex];
+        equipped.SetActive(true);
+    }
+
+    public void ShowEquipped(bool isSprinting) 
+    {
+        equipped.SetActive(!isSprinting);
     }
 
 }
