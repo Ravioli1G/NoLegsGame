@@ -1,4 +1,5 @@
 using System.Collections;
+using TMPro;
 using UnityEngine;
 
 public class Shotgun : MonoBehaviour
@@ -23,21 +24,38 @@ public class Shotgun : MonoBehaviour
     private Shell loadedShell;
     private bool isReloading = false;
     private float delay;
+    private bool isActive = true;
+    public TextMeshProUGUI canShoot;
+    public GameObject gunMesh;
 
     private void OnEnable()
     {
-        // incase reloading is not complete when player moves
         if (isReloading)
         {
-            StartCoroutine(reload(delay));
+            isReloading = false;
         }
     }
-
     private void Update()
     {
+        canShoot.text = "weap RELOADING: " + isReloading;
         if (Input.GetMouseButtonDown(0) && !isReloading)
         {
             Shoot();
+        }
+    }
+
+    public void setMeshActive(bool enableWeap)
+    {
+
+        if (enableWeap && !isActive) // prevent checks when already active
+        {
+            gunMesh.GetComponent<MeshRenderer>().enabled = true;
+            isActive = true;
+        }
+        else if (!enableWeap)
+        {
+            gunMesh.GetComponent<MeshRenderer>().enabled = false;
+            isActive = false;
         }
     }
 
@@ -90,7 +108,7 @@ public class Shotgun : MonoBehaviour
         if (hit.collider.tag == "Enemy")
         {
             // replace with enemy death when implemented
-            Destroy(hit.collider.gameObject);
+            //Destroy(hit.collider.gameObject);
         }
         if (hit.collider.gameObject.layer == LayerMask.NameToLayer("Ground"))
         {
